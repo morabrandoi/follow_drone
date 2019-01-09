@@ -35,6 +35,15 @@ def map_bounds_to_movement(box, img_height, img_width):
     else:
         print(f"drone.backwards({longitudinal_speed_value})")
 
+    # get low if high
+    vert_speed_value = round(abs(1 - ((mid_point[1]+1) / (img_height // 2))) * 25)
+    if mid_point[1] <= (img_height // 2):
+        # person on left, turn counter_clockwise
+        print(f"drone.up({vert_speed_value})")
+    else:
+        #person on right, turn clockwises
+        print(f"drone.down({vert_speed_value})")
+
 time_of_last_detect = 0
 while(cap.isOpened()):
     ret, image = cap.read()
