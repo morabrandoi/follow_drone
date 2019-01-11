@@ -1,6 +1,7 @@
 from rCNN.Model import DetectorAPI
 import keyboard as ky
 import cv2.cv2 as cv2  # for avoidance of pylint error
+import subprocess
 import tellopy
 import numpy
 import time
@@ -118,6 +119,9 @@ model_path = './rCNN/frozen_inference_graph.pb'
 odapi = DetectorAPI(path_to_ckpt=model_path)
 threshold = 0.7
 
+if subprocess.call(["networksetup -setairportnetwork en0 BrandoTello"] , shell=True) != 0:
+    raise ValueError("Network not connected")
+
 drone = tellopy.Tello()
 
 try:
@@ -137,7 +141,7 @@ while 1:
         container
         break
     except Exception as e:
-        print("sumthing wen wong xD rawrz\n")
+        print("\n"*100 , "sumthing wen wong xD rawrz", "\n"*2)
         print(e)
 
         continue
@@ -147,6 +151,7 @@ keep_going = True
 
 
 time_of_last_detect = time.time()
+time_before_search = 30
 while keep_going:
     for frame in container.decode(video=0):
         if frame_skip > 0:
@@ -168,6 +173,7 @@ while keep_going:
             # Class 1 represents human
             if classes[i] == 1 and scores[i] > threshold:
                 time_of_last_detect = time.time()
+                time_before_search = 4
                 box = boxes[i]
                 mid_point = (int(((box[1]+box[3]) / 2)), int(((box[0]+box[2]) / 2)))
                 box_width = box[3] - box[1]
@@ -175,7 +181,8 @@ while keep_going:
                 cv2.circle(image, mid_point, 1, (0, 255, 0), 3)
                 map_bounds_to_movement(box, height, width)
                 break
-            elif time.time() - time_of_last_detect >= 4: # 4 seconds
+            elif time.time() - time_of_last_detect >= time_before_search: # 30 at first then 4 seconds
+                time_before_search = 100
                 drone.forward(0)
                 drone.left(0)
                 drone.up(0)
