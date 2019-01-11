@@ -93,23 +93,31 @@ def map_bounds_to_movement(box, img_height, img_width):
     # back up if close, get close if far
     screen_ratio = box_width / img_width
     target_screen_ratio = 0.5
-    longitudinal_speed_value = round((min(0.4, abs(target_screen_ratio - screen_ratio)) / 0.4) * 35)
+    longitudinal_speed_value = round((min(0.4, abs(target_screen_ratio - screen_ratio)) / 0.4) * 45) #100
 
     if screen_ratio < target_screen_ratio:
         drone.forward(longitudinal_speed_value)
     else:
+        # drone.forward(longitudinal_speed_value) # for attack mode
         drone.backward(longitudinal_speed_value)
 
     # get low if high
+    img_height = 800
+    mid_line_off = 100
+    for y in range(0,800):
+        mid_point = (None, y)
+        # expected - actual value
+        y_res = ((img_height // 2) + mid_line_off) - mid_point[1]
+        vert_speed_value = round((min(img_height // 2, abs(y_res)) / (img_height // 2)) * 100)
 
-    vert_speed_value = round(abs(1 - ((mid_point[1]+50) / (img_height // 2))) * 25)
-    if mid_point[1] <= (img_height // 2) + 50:
-        # go down if midpoint too low
-        drone.up(vert_speed_value)
-    else:
-        # go up if midpoint too high
-        drone.down(vert_speed_value)
-
+        if y_res >= 0:
+            # go down if midpoint too low
+            #drone.down(vert_speed_value)
+            print(y, vert_speed_value, "down")
+        else:
+            # go up if midpoint too high
+            #drone.up(vert_speed_value)
+            print(y, vert_speed_value, "up")
 
 
 
@@ -175,7 +183,7 @@ while keep_going:
             # Class 1 represents human
             if classes[i] == 1 and scores[i] > threshold:
                 time_of_last_detect = time.time()
-                time_before_search = 4
+                time_before_search = 5
                 box = boxes[i]
                 mid_point = (int(((box[1]+box[3]) / 2)), int(((box[0]+box[2]) / 2)))
                 box_width = box[3] - box[1]
