@@ -82,7 +82,7 @@ def map_bounds_to_movement(box, img_height, img_width):
     box_width = box[3] - box[1]
 
     # measure left or right "ness" and map from 0 - 100, clockwise rotation or counter_clockwise
-    yaw_speed_value = round(abs(1 - ((mid_point[0]+1) / (img_width // 2))) * 100)
+    yaw_speed_value = round(abs(1 - ((mid_point[0]+1) / (img_width // 2))) * 75)
     if mid_point[0] <= (img_width // 2):
         # person on left, turn counter_clockwise
         drone.counter_clockwise(yaw_speed_value)
@@ -101,13 +101,15 @@ def map_bounds_to_movement(box, img_height, img_width):
         drone.backward(longitudinal_speed_value)
 
     # get low if high
-    vert_speed_value = round(abs(1 - ((mid_point[1]+100) / (img_height // 2))) * 50)
-    if mid_point[1] + 100 <= (img_height // 2):
+
+    vert_speed_value = round(abs(1 - ((mid_point[1]+50) / (img_height // 2))) * 25)
+    if mid_point[1] <= (img_height // 2) + 50:
         # go down if midpoint too low
-        drone.down(vert_speed_value)
+        drone.up(vert_speed_value)
     else:
         # go up if midpoint too high
-        drone.up(vert_speed_value)
+        drone.down(vert_speed_value)
+
 
 
 
@@ -120,7 +122,7 @@ odapi = DetectorAPI(path_to_ckpt=model_path)
 threshold = 0.7
 
 if subprocess.call(["networksetup -setairportnetwork en0 BrandoTello"] , shell=True) != 0:
-    raise ValueError("Network not connected")
+    raise ValueError("Network not connected: Turn on copter maybe")
 
 drone = tellopy.Tello()
 
@@ -151,7 +153,7 @@ keep_going = True
 
 
 time_of_last_detect = time.time()
-time_before_search = 30
+time_before_search = 1000
 while keep_going:
     for frame in container.decode(video=0):
         if frame_skip > 0:
@@ -182,11 +184,11 @@ while keep_going:
                 map_bounds_to_movement(box, height, width)
                 break
             elif time.time() - time_of_last_detect >= time_before_search: # 30 at first then 4 seconds
-                time_before_search = 100
+                time_before_search = 1000
                 drone.forward(0)
                 drone.left(0)
                 drone.up(0)
-                drone.clockwise(40)
+                drone.clockwise(60)
 
         cv2.imshow("image", image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
