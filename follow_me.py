@@ -102,22 +102,19 @@ def map_bounds_to_movement(box, img_height, img_width):
         drone.backward(longitudinal_speed_value)
 
     # get low if high
-    img_height = 800
     mid_line_off = 100
-    for y in range(0,800):
-        mid_point = (None, y)
-        # expected - actual value
-        y_res = ((img_height // 2) + mid_line_off) - mid_point[1]
-        vert_speed_value = round((min(img_height // 2, abs(y_res)) / (img_height // 2)) * 100)
+    # expected - actual value
+    y_res = ((img_height // 2) + mid_line_off) - mid_point[1]
+    vert_speed_value = round((min(img_height // 2, abs(y_res)) / (img_height // 2)) * 100)
 
-        if y_res >= 0:
-            # go down if midpoint too low
-            #drone.down(vert_speed_value)
-            print(y, vert_speed_value, "down")
-        else:
-            # go up if midpoint too high
-            #drone.up(vert_speed_value)
-            print(y, vert_speed_value, "up")
+    if y_res >= 0:
+        # go down if midpoint too low
+        drone.down(vert_speed_value)
+        # print(y, vert_speed_value, "down")
+    else:
+        # go up if midpoint too high
+        drone.up(vert_speed_value)
+        # print(y, vert_speed_value, "up")
 
 
 
@@ -182,6 +179,7 @@ while keep_going:
         for i in range(len(boxes)):
             # Class 1 represents human
             if classes[i] == 1 and scores[i] > threshold:
+                drone.clockwise(0)
                 time_of_last_detect = time.time()
                 time_before_search = 5
                 box = boxes[i]
@@ -208,7 +206,7 @@ while keep_going:
             time_base = frame.time_base
         frame_skip = int((time.time() - start_time)/time_base)
     else:
-        if time.time() - time_of_last_detect > 12:
+        if time.time() - time_of_last_detect > 6:
             search_for_human = True
 
 cv2.destroyAllWindows()
