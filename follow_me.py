@@ -98,22 +98,22 @@ def map_bounds_to_movement(box, img_height, img_width):
     if screen_ratio < target_screen_ratio:
         drone.forward(longitudinal_speed_value)
     else:
-        # drone.forward(longitudinal_speed_value) # for attack mode
+        # drone.forward(100) # wfdor attack mode
         drone.backward(longitudinal_speed_value)
 
     # get low if high
-    mid_line_off = 100
+    mid_line_off = 15
     # expected - actual value
     y_res = ((img_height // 2) + mid_line_off) - mid_point[1]
-    vert_speed_value = round((min(img_height // 2, abs(y_res)) / (img_height // 2)) * 100)
+    vert_speed_value = round((min(img_height // 2, abs(y_res)) / (img_height // 2)) * 75)
 
     if y_res >= 0:
         # go down if midpoint too low
-        drone.down(vert_speed_value)
+        drone.up(vert_speed_value)
         # print(y, vert_speed_value, "down")
     else:
         # go up if midpoint too high
-        drone.up(vert_speed_value)
+        drone.down(vert_speed_value)
         # print(y, vert_speed_value, "up")
 
 
@@ -181,7 +181,7 @@ while keep_going:
             if classes[i] == 1 and scores[i] > threshold:
                 drone.clockwise(0)
                 time_of_last_detect = time.time()
-                time_before_search = 5
+                time_before_search = 1
                 box = boxes[i]
                 mid_point = (int(((box[1]+box[3]) / 2)), int(((box[0]+box[2]) / 2)))
                 box_width = box[3] - box[1]
